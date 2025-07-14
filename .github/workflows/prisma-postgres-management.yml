@@ -83,6 +83,8 @@ jobs:
             echo "Database ${{ env.DB_NAME }} exists with ID: $DB_EXISTS."
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "db-id=$DB_EXISTS" >> $GITHUB_OUTPUT
+            echo "Using DATABASE_URL prefix: $(echo "$RESPONSE")"
+
           else
             echo "No existing database found with name ${{ env.DB_NAME }}"
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -102,7 +104,7 @@ jobs:
           # Check if response contains an id (success case)
           if echo "$RESPONSE" | grep -q '"id":'; then
             echo "Database created successfully"
-            CONNECTION_STRING=$(echo "$RESPONSE" | jq -r '.connectionString')
+            CONNECTION_STRING=$(echo "$RESPONSE" | jq -r '.data.apiKeys[0].connectionString')
             echo "connection-string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
           else
             echo "Failed to create database"
