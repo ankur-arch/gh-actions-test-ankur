@@ -104,13 +104,16 @@ jobs:
           # Check if response contains an id (success case)
           if echo "$RESPONSE" | grep -q '"id":'; then
             echo "Database created successfully"
-            CONNECTION_STRING=$(echo "$RESPONSE" | jq -r '.data.apiKeys[0].connectionString')
+            CONNECTION_STRING=$(echo "$RESPONSE" | jq -r '.data.connectionString')
             echo "connection-string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
           else
             echo "Failed to create database"
             echo "$RESPONSE"
             exit 1
           fi
+      - name: Debug Connection String
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL"
 
       - name: Get Connection String for Existing Database
         id: get-connection
@@ -123,7 +126,7 @@ jobs:
             -d '{"name":"read_write_key"}' \
             "https://api.prisma.io/v1/projects/${{ env.PRISMA_PROJECT_ID }}/databases/${{ steps.check-db.outputs.db-id }}/connections")
 
-          CONNECTION_STRING=$(echo "$CONNECTION_RESPONSE" | jq -r '.connectionString')
+          CONNECTION_STRING=$(echo "$CONNECTION_RESPONSE" | jq -r '.data.connectionString')
           echo "connection-string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
 
       - name: Setup Database Schema
